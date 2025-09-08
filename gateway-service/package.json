@@ -1,0 +1,28 @@
+{
+  "name": "gateway-service",
+  "version": "1.0.0",
+  "description": "Apollo Federation Gateway for microservices",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:dev": "nodemon --exec ts-node src/index.ts",
+    "start:prod": "npm run build && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["apollo", "gateway", "federation", "graphql", "microservices"],
+  "author": "xpertbrdev",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/gateway": "^2.11.2",
+    "@apollo/server": "^5.0.0",
+    "graphql": "^16.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
+

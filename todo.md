@@ -1,4 +1,4 @@
-# TODO - Microservice NestJS com LegacyAdapterService
+# TODO - Microservice NestJS com LegacyAdapterService + Apollo Gateway
 
 ## Fase 1: Análise de arquitetura e recomendação de contratos
 - [x] Analisar prós e contras GraphQL Federation vs REST
@@ -21,7 +21,25 @@
 - [x] Configurar contratos de API
 
 ## Fase 5: Documentação e commit das alterações
-- [ ] Documentar arquitetura e uso
+- [x] Documentar arquitetura e uso
+- [x] Fazer commit das alterações
+- [x] Criar README específico do microservice
+
+## NOVA FASE: Gateway de Federação
+
+### Fase 1: Configuração do projeto do gateway
+- [x] Criar projeto Node.js para o gateway
+- [x] Instalar dependências do Apollo Gateway
+- [x] Configurar estrutura básica
+
+### Fase 2: Implementação do Apollo Gateway
+- [x] Configurar Apollo Gateway
+- [x] Definir subgraphs (data-provider-service)
+- [x] Implementar composição de schemas
+- [x] Configurar roteamento e resolução
+
+### Fase 3: Documentação e commit do gateway
+- [ ] Documentar configuração do gateway
+- [ ] Criar docker-compose unificado
 - [ ] Fazer commit das alterações
-- [ ] Criar README específico do microservice
 
