@@ -1,7 +1,8 @@
 import { FederationGateway } from './gateway';
-import process from 'process';
-
+// import process from 'process';
+process.loadEnvFile()
 // Configuração de variáveis de ambiente
+console.log('process.env', process.env.PORT)
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 

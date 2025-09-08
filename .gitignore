@@ -102,3 +102,6 @@ temp/
 ehthumbs.db
 Thumbs.db
 
+/data-provider-service/dist
+/data-provider-service/node_modules
+/gateway-service/node_modules
