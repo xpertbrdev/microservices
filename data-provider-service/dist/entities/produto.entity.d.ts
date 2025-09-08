@@ -1,0 +1,33 @@
+import { Entidade } from './entidade.entity';
+export declare class Produto {
+    idProdutos: number;
+    idFilial: number;
+    idEntidade?: number;
+    idLocalVendas?: number;
+    idGrupoProdutos: number;
+    idMarcas?: number;
+    codigoProduto?: string;
+    nomeProduto: string;
+    unidade?: string;
+    tipoTributacao?: number;
+    reducaoIcms?: number;
+    codigoBarraProduto?: string;
+    origemProduto?: number;
+    margemLucro?: number;
+    aliquotaIpi?: number;
+    aliquotaIss?: number;
+    aliquotaIcms?: number;
+    produtoComposto: boolean;
+    custoMedio?: number;
+    custoGerencial?: number;
+    margemSubst?: number;
+    qtdeTotal?: number;
+    dataCadastro?: Date;
+    descontoMaximo?: number;
+    ativo: boolean;
+    ncm?: string;
+    cest?: string;
+    localizacao?: string;
+    ultAlteracao?: Date;
+    entidade?: Entidade;
+}

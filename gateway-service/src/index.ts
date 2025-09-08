@@ -1,5 +1,5 @@
 import { FederationGateway } from './gateway';
-import * as process from 'process';
+import process from 'process';
 
 // Configuração de variáveis de ambiente
 const PORT = parseInt(process.env.PORT || '4000', 10);

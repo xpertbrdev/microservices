@@ -4,8 +4,8 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 import { getSubgraphList } from '../config/subgraphs';
 
 export class FederationGateway {
-  private gateway: ApolloGateway;
-  private server: ApolloServer;
+  private gateway!: ApolloGateway;
+  private server!: ApolloServer;
 
   constructor() {
     this.initializeGateway();
@@ -46,7 +46,7 @@ export class FederationGateway {
         console.error('Gateway Error:', {
           message: err.message,
           path: err.path,
-          source: err.source?.name,
+          locations: err.locations,
           extensions: err.extensions,
         });
 
@@ -64,15 +64,15 @@ export class FederationGateway {
       // Plugin para logging
       plugins: [
         {
-          requestDidStart() {
+          async requestDidStart() {
             return {
-              didResolveOperation(requestContext) {
+              async didResolveOperation(requestContext) {
                 console.log('Gateway Query:', {
                   operationName: requestContext.request.operationName,
                   query: requestContext.request.query?.substring(0, 200) + '...',
                 });
               },
-              didEncounterErrors(requestContext) {
+              async didEncounterErrors(requestContext) {
                 console.error('Gateway Errors:', requestContext.errors);
               },
             };

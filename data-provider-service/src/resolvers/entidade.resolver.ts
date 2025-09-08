@@ -1,4 +1,5 @@
 import { Resolver, Query, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
+import { Inject } from '@nestjs/common';
 import { Entidade, Produto } from '../entities';
 import { LegacyAdapterService, PaginationOptions, FilterOptions } from '../services/legacy-adapter.service';
 import { ObjectType, Field } from '@nestjs/graphql';
@@ -20,7 +21,10 @@ class EntidadeConnection {
 
 @Resolver(() => Entidade)
 export class EntidadeResolver {
-  constructor(private readonly legacyAdapterService: LegacyAdapterService) {}
+  constructor(
+    @Inject('LegacyAdapterService') 
+    private readonly legacyAdapterService: LegacyAdapterService
+  ) {}
 
   @Query(() => EntidadeConnection, { name: 'entidades' })
   async findAllEntidades(
