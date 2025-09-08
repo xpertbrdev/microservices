@@ -69,6 +69,11 @@ import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
   providers: [
     AppService,
     LegacyAdapterService,
+    // Provider com token para injeção de dependência
+    {
+      provide: 'LegacyAdapterService',
+      useClass: LegacyAdapterService,
+    },
     ProdutoResolver,
     EntidadeResolver,
     HealthResolver,
