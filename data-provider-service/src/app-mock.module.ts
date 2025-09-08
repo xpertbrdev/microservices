@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MockDataService } from './services/mock-data.service';
 import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
+import { MockDataLoaderService } from './dataloaders/mock-dataloader.service';
 
 @Module({
   imports: [
@@ -26,7 +27,12 @@ import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
         playground: configService.get('GRAPHQL_PLAYGROUND', true),
         debug: configService.get('GRAPHQL_DEBUG', true),
         introspection: true,
-        context: ({ req }) => ({ req }),
+        context: ({ req }) => {
+          return { 
+            req,
+            dataLoaders: new MockDataLoaderService(new MockDataService())
+          };
+        },
         formatError: (error) => {
           console.error('GraphQL Error:', error);
           return {
@@ -48,6 +54,9 @@ import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
       provide: 'LegacyAdapterService',
       useClass: MockDataService,
     },
+    // Mock DataLoader Service
+    MockDataLoaderService,
+    // Resolvers
     ProdutoResolver,
     EntidadeResolver,
     HealthResolver,

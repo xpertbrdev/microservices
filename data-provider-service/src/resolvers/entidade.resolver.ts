@@ -1,7 +1,8 @@
-import { Resolver, Query, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int, ResolveField, Parent, Context } from '@nestjs/graphql';
 import { Inject } from '@nestjs/common';
 import { Entidade, Produto } from '../entities';
 import { LegacyAdapterService, PaginationOptions, FilterOptions } from '../services/legacy-adapter.service';
+import { DataLoaderService, createDataLoaderKey } from '../dataloaders';
 import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
@@ -46,41 +47,62 @@ export class EntidadeResolver {
   async findEntidadeById(
     @Args('idEntidade', { type: () => Int }) idEntidade: number,
     @Args('idFilial', { type: () => Int }) idFilial: number,
+    @Context() context: any,
   ): Promise<Entidade | null> {
-    return await this.legacyAdapterService.findEntidadeById(idEntidade, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(idEntidade, idFilial);
+    return await dataLoaders.entidadeByIdLoader.load(key);
   }
 
   @Query(() => [Entidade], { name: 'entidadesByCnpjCpf' })
   async findEntidadesByCnpjCpf(
     @Args('cnpjCpf') cnpjCpf: string,
-    @Args('idFilial', { type: () => Int, nullable: true }) idFilial?: number,
+    @Context() context: any,
   ): Promise<Entidade[]> {
-    return await this.legacyAdapterService.findEntidadesByCnpjCpf(cnpjCpf, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    return await dataLoaders.entidadesByCnpjCpfLoader.load(cnpjCpf);
   }
 
   @Query(() => [Entidade], { name: 'entidadesByCategoria' })
   async findEntidadesByCategoria(
     @Args('categoria') categoria: string,
-    @Args('idFilial', { type: () => Int, nullable: true }) idFilial?: number,
+    @Context() context: any,
   ): Promise<Entidade[]> {
-    return await this.legacyAdapterService.findEntidadesByCategoria(categoria, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    return await dataLoaders.entidadesByCategoriaLoader.load(categoria);
   }
 
   @Query(() => Int, { name: 'limiteCredito' })
   async getLimiteCredito(
     @Args('idEntidade', { type: () => Int }) idEntidade: number,
     @Args('idFilial', { type: () => Int }) idFilial: number,
+    @Context() context: any,
   ): Promise<number> {
-    return await this.legacyAdapterService.getLimiteCredito(idEntidade, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(idEntidade, idFilial);
+    return await dataLoaders.limiteCreditoLoader.load(key);
   }
 
-  // Resolver de campo para carregar produtos relacionados
+  // Resolver de campo para carregar produtos relacionados usando DataLoader
   @ResolveField(() => [Produto], { nullable: true })
-  async produtos(@Parent() entidade: Entidade): Promise<Produto[]> {
-    return await this.legacyAdapterService.findProdutosByEntidade(
-      entidade.idEntidade,
-      entidade.idFilial
-    );
+  async produtos(
+    @Parent() entidade: Entidade,
+    @Context() context: any,
+  ): Promise<Produto[]> {
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(entidade.idEntidade, entidade.idFilial);
+    return await dataLoaders.produtosByEntidadeLoader.load(key);
+  }
+
+  // Resolver de campo para carregar limite de crédito usando DataLoader
+  @ResolveField(() => Int, { name: 'limiteCreditoAtual' })
+  async limiteCreditoAtual(
+    @Parent() entidade: Entidade,
+    @Context() context: any,
+  ): Promise<number> {
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(entidade.idEntidade, entidade.idFilial);
+    return await dataLoaders.limiteCreditoLoader.load(key);
   }
 }
 

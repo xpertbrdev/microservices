@@ -1,7 +1,8 @@
-import { Resolver, Query, Args, Int, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int, ResolveField, Parent, Context } from '@nestjs/graphql';
 import { Inject } from '@nestjs/common';
 import { Produto, Entidade } from '../entities';
 import { LegacyAdapterService, PaginationOptions, FilterOptions } from '../services/legacy-adapter.service';
+import { DataLoaderService, createDataLoaderKey } from '../dataloaders';
 import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
@@ -46,43 +47,68 @@ export class ProdutoResolver {
   async findProdutoById(
     @Args('idProdutos', { type: () => Int }) idProdutos: number,
     @Args('idFilial', { type: () => Int }) idFilial: number,
+    @Context() context: any,
   ): Promise<Produto | null> {
-    return await this.legacyAdapterService.findProdutoById(idProdutos, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(idProdutos, idFilial);
+    return await dataLoaders.produtoByIdLoader.load(key);
   }
 
   @Query(() => [Produto], { name: 'produtosByCodigo' })
   async findProdutosByCodigo(
     @Args('codigo') codigo: string,
-    @Args('idFilial', { type: () => Int, nullable: true }) idFilial?: number,
+    @Context() context: any,
   ): Promise<Produto[]> {
-    return await this.legacyAdapterService.findProdutosByCodigo(codigo, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    return await dataLoaders.produtosByCodigoLoader.load(codigo);
   }
 
   @Query(() => [Produto], { name: 'produtosByEntidade' })
   async findProdutosByEntidade(
     @Args('idEntidade', { type: () => Int }) idEntidade: number,
     @Args('idFilial', { type: () => Int }) idFilial: number,
+    @Context() context: any,
   ): Promise<Produto[]> {
-    return await this.legacyAdapterService.findProdutosByEntidade(idEntidade, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(idEntidade, idFilial);
+    return await dataLoaders.produtosByEntidadeLoader.load(key);
   }
 
   @Query(() => Int, { name: 'estoque' })
   async getEstoque(
     @Args('idProdutos', { type: () => Int }) idProdutos: number,
     @Args('idFilial', { type: () => Int }) idFilial: number,
+    @Context() context: any,
   ): Promise<number> {
-    return await this.legacyAdapterService.getEstoque(idProdutos, idFilial);
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(idProdutos, idFilial);
+    return await dataLoaders.estoqueLoader.load(key);
   }
 
-  // Resolver de campo para carregar entidade relacionada
+  // Resolver de campo para carregar entidade relacionada usando DataLoader
   @ResolveField(() => Entidade, { nullable: true })
-  async entidade(@Parent() produto: Produto): Promise<Entidade | null> {
-    if (!produto.idEntidade) return null;
-    
-    return await this.legacyAdapterService.findEntidadeById(
-      produto.idEntidade,
-      produto.idFilial
-    );
+  async entidade(
+    @Parent() produto: Produto,
+    @Context() context: any,
+  ): Promise<Entidade | null> {
+    if (!produto.idEntidade) {
+      return null;
+    }
+
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(produto.idEntidade, produto.idFilial);
+    return await dataLoaders.entidadeByIdLoader.load(key);
+  }
+
+  // Resolver de campo para carregar estoque usando DataLoader
+  @ResolveField(() => Int, { name: 'estoqueAtual' })
+  async estoqueAtual(
+    @Parent() produto: Produto,
+    @Context() context: any,
+  ): Promise<number> {
+    const dataLoaders: DataLoaderService = context.dataLoaders;
+    const key = createDataLoaderKey(produto.idProdutos, produto.idFilial);
+    return await dataLoaders.estoqueLoader.load(key);
   }
 }
 

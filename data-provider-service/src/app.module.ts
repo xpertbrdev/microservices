@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { Produto, Entidade } from './entities';
 import { LegacyAdapterService } from './services/legacy-adapter.service';
 import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
+import { DataLoaderModule, DataLoaderService } from './dataloaders';
 
 @Module({
   imports: [
@@ -41,18 +42,24 @@ import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
     // TypeORM Repositories
     TypeOrmModule.forFeature([Produto, Entidade]),
 
+    // DataLoaders Module
+    DataLoaderModule,
+
     // GraphQL Federation
     GraphQLModule.forRootAsync<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
+      imports: [ConfigModule, DataLoaderModule],
+      useFactory: (configService: ConfigService, dataLoaderService: DataLoaderService) => ({
         autoSchemaFile: {
           federation: 2,
         },
         playground: configService.get('GRAPHQL_PLAYGROUND', true),
         debug: configService.get('GRAPHQL_DEBUG', true),
         introspection: true,
-        context: ({ req }) => ({ req }),
+        context: ({ req }) => ({ 
+          req,
+          dataLoaders: dataLoaderService
+        }),
         formatError: (error) => {
           console.error('GraphQL Error:', error);
           return {
@@ -62,7 +69,7 @@ import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
           };
         },
       }),
-      inject: [ConfigService],
+      inject: [ConfigService, DataLoaderService],
     }),
   ],
   controllers: [AppController],
@@ -74,6 +81,7 @@ import { ProdutoResolver, EntidadeResolver, HealthResolver } from './resolvers';
       provide: 'LegacyAdapterService',
       useClass: LegacyAdapterService,
     },
+    // Resolvers
     ProdutoResolver,
     EntidadeResolver,
     HealthResolver,
